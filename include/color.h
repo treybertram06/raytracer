@@ -7,7 +7,7 @@
 
 #include "vec3.h"
 
-#include <iostream>
+#include "usefulstuff.h"
 
 using color = vec3;
 
