@@ -21,7 +21,17 @@ int main() {
 
     cam.imageWidth = 1280;
     cam.imageHeight = 720;
-    cam.samples_per_pixel = 100;
+    cam.samples_per_pixel = 25;
+
+    /*
+    clog << "Enter image width: ";
+    cin >> cam.imageWidth;
+    clog << "Enter image height: ";
+    cin >> cam.imageHeight;
+    clog << "Enter sampling rate: ";
+    cin >> cam.samples_per_pixel;
+    */
+
 
     cam.render(world);
 

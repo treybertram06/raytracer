@@ -7,12 +7,16 @@
 
 #include "hittable.h"
 using namespace std;
+#include <vector>
+#include <thread>
+#include <mutex>
 
 class camera {
   public:
     int imageWidth;
     int imageHeight;
     int samples_per_pixel;
+
 
 
     void render(const hittable& world) {
@@ -27,7 +31,7 @@ class camera {
           color pixel_color(0,0,0);
           for (int sample = 0; sample < samples_per_pixel; sample++) {
             ray r = get_ray(i, j);
-            pixel_color += rayColor(r, world);
+            pixel_color += ray_color(r, world);
           }
           write_color(std::cout, pixel_samples_scale * pixel_color);
 
@@ -90,10 +94,11 @@ class camera {
       return vec3(random_double() - 0.5, random_double() - 0.5, 0);
     }
 
-    color rayColor(const ray& r, const hittable& world) const {
+    color ray_color(const ray& r, const hittable& world) const {
       hit_record rec;
       if (world.hit(r, interval(0, infinity), rec)) {
-        return 0.5 * (rec.normal + color(1,1,1));
+        vec3 direction = random_on_hemisphere(rec.normal);
+        return 0.5 * ray_color(ray(rec.p, direction), world);
       }
 
       vec3 unitDirection = unit_vector(r.direction());
