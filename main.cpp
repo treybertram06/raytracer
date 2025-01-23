@@ -13,7 +13,7 @@ int main() {
 
     hittable_list world;
 
-    /*
+
     auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
     auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
     auto material_left   = make_shared<dielectric>(1.50);
@@ -25,26 +25,22 @@ int main() {
     world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
     world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.4, material_bubble));
     world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
-    */
 
-    auto R = std::cos(pi/4);
 
-    auto material_left = make_shared<lambertian>(color(0,0,1));
-    auto material_right = make_shared<lambertian>(color(1,0,0));
-
-    world.add(make_shared<sphere>(point3(-R, 0, -1), R, material_left));
-    world.add(make_shared<sphere>(point3( R, 0, -1), R, material_right));
 
 
 
     camera cam;
 
-    cam.imageWidth = 640;
-    cam.imageHeight = 360;
-    cam.samples_per_pixel = 25;
-    cam.maxDepth = 25;
+    cam.imageWidth = 1920;
+    cam.imageHeight = 1080;
+    cam.samples_per_pixel = 50;
+    cam.maxDepth = 50;
 
     cam.vfov = 60;
+    cam.lookfrom = point3(-2,2,1);
+    cam.lookat   = point3(0,0,-1);
+    cam.vup      = vec3(0,1,0);
 
     /*
     clog << "Enter image width: ";

@@ -20,7 +20,10 @@ public:
   int samples_per_pixel;
   int maxDepth;
 
-  double vfov = 90; //vertical fov
+  double vfov; //vertical fov
+  point3 lookfrom = point3(0,0,0);
+  point3 lookat = point3(0,0,-1);
+  vec3 vup = vec3(0,1,0);
 
 
 
@@ -47,32 +50,39 @@ public:
     }
 
 private:
-  double focalLength = 1.0;
   vec3 pixel00Loc; //location of pixel 0,0
   vec3 pixelDeltaU;
   vec3 pixelDeltaV;
   point3 center;
   double pixel_samples_scale; //colour scale factor for a sum of pixel samples
+  vec3 u, v, w;
 
-  double theta = degrees_to_radians(vfov);
-  double h = std::tan(theta/2);
-  double viewportHeight = 2*h * focalLength;
+
 
 
 
     void initialize() {
+      auto focalLength = (lookfrom - lookat).length();
+
       //viewport width is calculated based off height and image aspect ratio
+      double theta = degrees_to_radians(vfov);
+      double h = std::tan(theta/2);
+      auto viewportHeight = 2*h * focalLength;
       double viewportWidth = viewportHeight * (static_cast<double>(imageWidth) / static_cast<double>(imageHeight));
-      center = point3(0, 0, 0);
+
+      w = unit_vector(lookfrom - lookat);
+      u = unit_vector(cross(vup, w));
+      v = cross(w, u);
 
       pixel_samples_scale = 1.0 / samples_per_pixel;
 
-      // Calculate the vectors across the horizontal and down vertical edges
+      center = lookfrom;
+
 
       //horizontal vector points to the right
-      vec3 viewportU = vec3(viewportWidth, 0, 0);
+      vec3 viewportU = viewportWidth * u;
       //and vertical points down
-      vec3 viewportV = vec3(0, -viewportHeight, 0);
+      vec3 viewportV = viewportHeight * -v;
 
       //Calculate the delta vectors from pixel to pixel
       pixelDeltaU = viewportU / imageWidth;
@@ -80,7 +90,7 @@ private:
 
       //Calculate the location of the upper left pixel
       //viewportUpperLeft = {half of width, half of height, distance from camera to viewport}
-      vec3 viewportUpperLeft = center - vec3(0, 0, focalLength) - viewportU/2 - viewportV/2;
+      vec3 viewportUpperLeft = center - (focalLength * w) - viewportU/2 - viewportV/2;
       pixel00Loc = viewportUpperLeft + 0.5 * (pixelDeltaU + pixelDeltaV);
     }
 
