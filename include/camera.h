@@ -5,6 +5,8 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <bits/algorithmfwd.h>
+
 #include "hittable.h"
 #include "material.h"
 
@@ -34,10 +36,13 @@ public:
   void render(const hittable& world) {
     initialize();
 
+    vector< vector<color> > image;
+
     cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
      for (int j = 0; j < image_height; j++) {
        clog << "\rScanlines remaining: " << (image_height - j) << ' ' << flush;
+       vector<color> line;
        for (int i = 0; i < image_width; i++) {
 
         color pixel_color(0,0,0);
@@ -46,11 +51,17 @@ public:
           pixel_color += ray_color(r, max_depth, world);
         }
         write_color(std::cout, pixel_samples_scale * pixel_color);
-
+        line.push_back(pixel_samples_scale * pixel_color);
        }
+       image.push_back(line);
      }
 
       clog << "\rDone.            \n";
+
+      clog << "Writing to file...\n";
+      write_image_buffer_to_file(image);
+
+
     }
 
 private:
@@ -64,6 +75,22 @@ private:
   vec3 defocus_disk_v;
 
 
+  void write_image_buffer_to_file(vector< vector<color> >& image) {
+
+    int height = image.size();
+    int width = image[0].size();
+
+    // PPM header
+    cout << "P3\n" << width << " " << height << "\n255\n";
+
+    // Write pixel data
+    for (const auto& row : image) {
+      for (const auto& pixel : row) {
+        write_color(std::cout, pixel);
+      }
+      cout << "\n";
+    }
+  }
 
 
 
