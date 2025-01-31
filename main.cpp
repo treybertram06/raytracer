@@ -456,7 +456,7 @@ void final_scene(int image_height, int image_width, int samples_per_pixel, int m
 
 int main() {
 
-    switch (11) {
+    switch (10) {
         case 1: bouncing_spheres();     break;
         case 2: checkered_spheres();    break;
         case 3: earth();                break;

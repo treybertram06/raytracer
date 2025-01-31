@@ -13,6 +13,7 @@
 using namespace std;
 #include <vector>
 #include <thread>
+#include <atomic>
 #include <mutex>
 
 class camera {
@@ -35,34 +36,62 @@ public:
 
   void render(const hittable& world) {
     initialize();
+    clog << "Rendering image...\n";
+    vector<vector<color>> image(image_height, vector<color>(image_width));  // Properly preallocate
+    //cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-    vector< vector<color> > image;
+    atomic<int> completed_lines(0);
+    atomic<int> remaining_lines(image_height);
 
-    cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+    int max_threads = max(1, static_cast<int>(thread::hardware_concurrency()) - 4);
+    atomic<int> next_line(0);
+    mutex print_mutex;  // Ensure safe printing
 
-     for (int j = 0; j < image_height; j++) {
-       clog << "\rScanlines remaining: " << (image_height - j) << ' ' << flush;
-       vector<color> line;
-       for (int i = 0; i < image_width; i++) {
+    auto render_worker = [&]() {
+      while (true) {
+        int j = next_line.fetch_add(1);
+        if (j >= image_height) break;  // Prevent out-of-bounds access
 
-        color pixel_color(0,0,0);
-        for (int sample = 0; sample < samples_per_pixel; sample++) {
-          ray r = get_ray(i, j);
-          pixel_color += ray_color(r, max_depth, world);
+        vector<color> line(image_width);  // Store locally to avoid conflicts
+        for (int i = 0; i < image_width; i++) {
+          color pixel_color(0, 0, 0);
+          for (int sample = 0; sample < samples_per_pixel; sample++) {
+            ray r = get_ray(i, j);
+            pixel_color += ray_color(r, max_depth, world);
+          }
+          line[i] = pixel_samples_scale * pixel_color;
         }
-        write_color(std::cout, pixel_samples_scale * pixel_color);
-        line.push_back(pixel_samples_scale * pixel_color);
-       }
-       image.push_back(line);
-     }
 
-      clog << "\rDone.            \n";
+        // Copy line safely into the main image buffer
+        image[j] = move(line);
 
-      clog << "Writing to file...\n";
-      write_image_buffer_to_file(image);
+        completed_lines++;
+        remaining_lines--;
 
+        // Safe printing using mutex
+        {
+          lock_guard<mutex> lock(print_mutex);
+          clog << "\rLines completed: " << completed_lines
+               << " | Lines remaining: " << remaining_lines << flush;
+        }
+      }
+    };
 
+    // Spawn worker threads
+    vector<thread> threads;
+    for (int i = 0; i < max_threads; i++) {
+      threads.emplace_back(render_worker);
     }
+
+    // Join threads
+    for (auto& t : threads) {
+      t.join();
+    }
+
+    clog << "\nDone.\n";
+    clog << "Writing to file...\n";
+    write_image_buffer_to_file(image);
+  }
 
 private:
   vec3 pixel00_loc; //location of pixel 0,0
