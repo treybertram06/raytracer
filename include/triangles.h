@@ -59,12 +59,12 @@ public:
       //given the hit point in planar coords, ret false if its
       //outside the primitive, else set the hit record uv coords and ret true
 
-      // a(b) = (-a/b) + a
 
-      double y = (-a/b)*b + a;
+      bool within_u = (0 <= a && a <= 1);
+      bool within_v = (0 <= b && b <= 1);
+      bool within_hyp = (b <= 1 - a);
 
-
-      if (b > y)
+      if (!(within_u && within_v && within_hyp))
         return false;
 
       rec.u = a;

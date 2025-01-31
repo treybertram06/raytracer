@@ -14,7 +14,7 @@
 using namespace std;
 
 void bouncing_spheres() {
-        hittable_list world;
+    hittable_list world;
 
     auto checker = make_shared<checker_texture>(0.32, color(.2,.3,.1), color(.9,.9,.9));
     world.add(make_shared<sphere>(point3(0,-1000,0), 1000, make_shared<lambertian>(checker)));
@@ -66,6 +66,8 @@ void bouncing_spheres() {
     cam.image_height        = 360;
     cam.samples_per_pixel   = 25;
     cam.max_depth           = 25;
+    cam.background          = color(0.70, 0.80, 1.00);
+
 
     cam.vfov     = 20;
     cam.lookfrom = point3(13,2,3);
@@ -105,6 +107,8 @@ void checkered_spheres() {
     cam.image_height        = 360;
     cam.samples_per_pixel   = 25;
     cam.max_depth           = 25;
+    cam.background          = color(0.70, 0.80, 1.00);
+
 
     cam.vfov     = 20;
     cam.lookfrom = point3(13,2,3);
@@ -129,6 +133,8 @@ void earth() {
     cam.image_height        = 360;
     cam.samples_per_pixel   = 25;
     cam.max_depth           = 25;
+    cam.background          = color(0.70, 0.80, 1.00);
+
 
     cam.vfov     = 20;
     cam.lookfrom = point3(0,0,12);
@@ -155,6 +161,8 @@ void perlin_spheres() {
     cam.image_height        = 360;
     cam.samples_per_pixel   = 50;
     cam.max_depth           = 25;
+    cam.background          = color(0.70, 0.80, 1.00);
+
 
     cam.vfov     = 20;
     cam.lookfrom = point3(13,2,3);
@@ -191,6 +199,8 @@ void quads() {
     cam.image_height        = 360;
     cam.samples_per_pixel   = 50;
     cam.max_depth           = 25;
+    cam.background          = color(0.70, 0.80, 1.00);
+
 
     cam.vfov     = 80;
     cam.lookfrom = point3(0,0,9);
@@ -203,7 +213,6 @@ void quads() {
     cam.render(world);
 }
 
-//does not work:(
 void tris() {
     hittable_list world;
 
@@ -227,6 +236,8 @@ void tris() {
     cam.image_height        = 360;
     cam.samples_per_pixel   = 50;
     cam.max_depth           = 25;
+    cam.background          = color(0.70, 0.80, 1.00);
+
 
     cam.vfov     = 80;
     cam.lookfrom = point3(0,0,9);
@@ -239,15 +250,46 @@ void tris() {
     cam.render(world);
 }
 
+void simple_light() {
+    hittable_list world;
+
+    auto pertext = make_shared<noise_texture>(4);
+    world.add(make_shared<sphere>(point3(0,-1000,0), 1000, make_shared<lambertian>(pertext)));
+    world.add(make_shared<sphere>(point3(0,2,0), 2, make_shared<lambertian>(pertext)));
+
+    auto difflight = make_shared<diffuse_light>(color(4,4,4));
+    world.add(make_shared<quad>(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), difflight));
+
+    camera cam;
+
+    cam.image_width         = 640;
+    cam.image_height        = 360;
+    cam.samples_per_pixel   = 50;
+    cam.max_depth           = 25;
+    cam.background          = color(0, 0, 0);
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(26,3,6);
+    cam.lookat   = point3(0,2,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+    cam.focus_dist    = 10.0;
+
+
+    cam.render(world);
+}
+
 int main() {
 
-    switch (6) {
+    switch (7) {
         case 1: bouncing_spheres();     break;
         case 2: checkered_spheres();    break;
         case 3: earth();                break;
         case 4: perlin_spheres();       break;
         case 5: quads();                break;
-        case 6: tris();                break;
+        case 6: tris();                 break;
+        case 7: simple_light();         break;
 
     }
 
