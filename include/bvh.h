@@ -10,6 +10,7 @@
 #include "hittable_list.h"
 #include "usefulstuff.h"
 
+#include <thread>
 #include <algorithm>
 
 class bvh_node : public hittable {
@@ -21,11 +22,18 @@ public:
     // persist the resulting bounding volume hierarchy.
   }
 
-  bvh_node(std::vector< shared_ptr<hittable> >& objects, size_t start, size_t end) {
-    // Build the bounding box of the span of source objects.
+  bvh_node(std::vector<shared_ptr<hittable>>& objects, size_t start, size_t end) {
+    // Compute bounding box for the entire object span
     bbox = aabb::empty;
-    for (size_t object_index=start; object_index < end; object_index++)
-      bbox = aabb(bbox, objects[object_index]->bounding_box());
+
+    std::vector<aabb> bounding_boxes;
+    bounding_boxes.reserve(end - start);
+
+    for (size_t i = start; i < end; ++i) {
+      aabb box = objects[i]->bounding_box();
+      bounding_boxes.push_back(box);
+      bbox = aabb(bbox, box);  // Merge bounding boxes
+    }
 
     int axis = bbox.longest_axis();
 
@@ -38,9 +46,15 @@ public:
     if (object_span == 1) {
       left = right = objects[start];
     } else if (object_span == 2) {
-      left = objects[start];
-      right = objects[start+1];
+      if (comparator(objects[start], objects[start + 1])) {
+        left = objects[start];
+        right = objects[start + 1];
+      } else {
+        left = objects[start + 1];
+        right = objects[start];
+      }
     } else {
+      // Use bounding_boxes to compare instead of calling bounding_box() repeatedly
       std::sort(std::begin(objects) + start, std::begin(objects) + end, comparator);
 
       auto mid = start + object_span / 2;
@@ -53,11 +67,16 @@ public:
     if (!bbox.hit(r, ray_t))
       return false;
 
-    bool hit_left = left->hit(r, ray_t, rec);
-    bool hit_right = right->hit(r, interval(ray_t.min, hit_left ? rec.t : ray_t.max), rec);
+    bool is_left_first = r.direction()[bbox.longest_axis()] < 0;
+    const auto first = is_left_first ? right : left;
+    const auto second = is_left_first ? left : right;
 
-    return hit_left || hit_right;
+    bool hit_first = first->hit(r, ray_t, rec);
+    bool hit_second = second->hit(r, interval(ray_t.min, hit_first ? rec.t : ray_t.max), rec);
+
+    return hit_first || hit_second;
   }
+
 
   aabb bounding_box() const override { return bbox; }
 
