@@ -11,6 +11,8 @@
 #include "include/bvh.h"
 #include "include/texture.h"
 
+#include <iomanip>
+
 
 using namespace std;
 
@@ -456,7 +458,7 @@ void final_scene(int image_height, int image_width, int samples_per_pixel, int m
 
 int main() {
 
-    switch (10) {
+    switch (8) {
         case 1: bouncing_spheres();     break;
         case 2: checkered_spheres();    break;
         case 3: earth();                break;
@@ -470,6 +472,7 @@ int main() {
         case 11: final_scene(360, 640, 100, 50); break;
 
     }
+
 
     return 0;
 }
