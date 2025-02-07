@@ -489,7 +489,7 @@ void final_scene(int image_height, int image_width, int samples_per_pixel, int m
 
 int main() {
 
-    switch (11) {
+    switch (8) {
         case 1: bouncing_spheres();     break;
         case 2: checkered_spheres();    break;
         case 3: earth();                break;
@@ -499,7 +499,7 @@ int main() {
         case 7: simple_light();         break;
         case 8: cornell_box();          break;
         case 9: cornell_smoke();        break;
-        case 10: final_scene(1080, 1920, 1000, 50); break;
+        case 10: final_scene(720, 1280, 50, 50); break;
         case 11: final_scene(360, 640, 100, 50); break;
 
     }
