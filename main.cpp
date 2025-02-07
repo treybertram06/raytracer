@@ -346,6 +346,7 @@ void cornell_box() {
 
     cam.defocus_angle = 0;
     cam.focus_dist    = 10.0;
+    cam.threads_left  = 1;
 
 
     cam.render(world, lights);
@@ -480,13 +481,15 @@ void final_scene(int image_height, int image_width, int samples_per_pixel, int m
     cam.defocus_angle = 0;
     cam.focus_dist    = 10.0;
 
+    cam.threads_left  = 1;
+
 
     cam.render(world, lights);
 }
 
 int main() {
 
-    switch (8) {
+    switch (11) {
         case 1: bouncing_spheres();     break;
         case 2: checkered_spheres();    break;
         case 3: earth();                break;

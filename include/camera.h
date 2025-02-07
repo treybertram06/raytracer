@@ -31,6 +31,8 @@ public:
   double defocus_angle;
   double focus_dist;
 
+  int threads_left = 99999;
+
 
 
   void render(const hittable& world, const hittable& lights) {
@@ -42,7 +44,7 @@ public:
     atomic<int> completed_lines(0);
     atomic<int> remaining_lines(image_height);
 
-    int max_threads = max(1, static_cast<int>(thread::hardware_concurrency()) - 4);
+    int max_threads = max(1, static_cast<int>(thread::hardware_concurrency()) - threads_left);
     atomic<int> next_line(0);
     mutex print_mutex;  // Ensure safe printing
 
