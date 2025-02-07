@@ -62,6 +62,9 @@ void bouncing_spheres() {
 
     world = hittable_list(make_shared<bvh_node>(world));
 
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(0,0,0), vec3(0,0,0), vec3(0,0,0), empty_material);
+
 
     camera cam;
 
@@ -90,7 +93,7 @@ void bouncing_spheres() {
     */
 
 
-    cam.render(world);
+    cam.render(world, lights);
 
 
 
@@ -103,6 +106,9 @@ void checkered_spheres() {
 
     world.add(make_shared<sphere>(point3(0,-10, 0), 10, make_shared<lambertian>(checker)));
     world.add(make_shared<sphere>(point3(0, 10, 0), 10, make_shared<lambertian>(checker)));
+
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(0,0,0), vec3(0,0,0), vec3(0,0,0), empty_material);
 
     camera cam;
 
@@ -122,7 +128,7 @@ void checkered_spheres() {
     cam.focus_dist    = 10.0;
 
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void earth() {
@@ -148,7 +154,7 @@ void earth() {
     cam.focus_dist    = 10.0;
 
 
-    cam.render(hittable_list(globe));
+    //cam.render(hittable_list(globe));
 }
 
 void perlin_spheres() {
@@ -157,6 +163,9 @@ void perlin_spheres() {
     auto pertext = make_shared<noise_texture>(8);
     world.add(make_shared<sphere>(point3(0,-1000,0), 1000, make_shared<lambertian>(pertext)));
     world.add(make_shared<sphere>(point3(0,2,0), 2, make_shared<lambertian>(pertext)));
+
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(0,0,0), vec3(0,0,0), vec3(0,0,0), empty_material);
 
     camera cam;
 
@@ -175,7 +184,7 @@ void perlin_spheres() {
     cam.defocus_angle = 0;
     cam.focus_dist    = 10.0;
 
-    cam.render(world);
+    cam.render(world, lights);
 
 }
 
@@ -196,6 +205,9 @@ void quads() {
     world.add(make_shared<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange));
     world.add(make_shared<quad>(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal));
 
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(0,0,0), vec3(0,0,0), vec3(0,0,0), empty_material);
+
     camera cam;
 
     cam.image_width         = 640;
@@ -213,7 +225,7 @@ void quads() {
     cam.defocus_angle = 0;
     cam.focus_dist    = 10.0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void tris() {
@@ -233,6 +245,9 @@ void tris() {
     world.add(make_shared<triangles>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange));
     world.add(make_shared<triangles>(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal));
 
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(0,0,0), vec3(0,0,0), vec3(0,0,0), empty_material);
+
     camera cam;
 
     cam.image_width         = 640;
@@ -250,7 +265,7 @@ void tris() {
     cam.defocus_angle = 0;
     cam.focus_dist    = 10.0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void simple_light() {
@@ -263,6 +278,9 @@ void simple_light() {
     auto difflight = make_shared<diffuse_light>(color(4,4,4));
     world.add(make_shared<sphere>(point3(0,7,0), 2, difflight));
     world.add(make_shared<quad>(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), difflight));
+
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(0,0,0), vec3(0,0,0), vec3(0,0,0), empty_material);
 
     camera cam;
 
@@ -281,7 +299,7 @@ void simple_light() {
     cam.focus_dist    = 10.0;
 
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void cornell_box() {
@@ -309,12 +327,15 @@ void cornell_box() {
     box2 = make_shared<translate>(box2, vec3(130,0,65));
     world.add(box2);
 
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
+
 
     camera cam;
 
-    cam.image_width         = 640;
-    cam.image_height        = 360;
-    cam.samples_per_pixel   = 50;
+    cam.image_width         = 600;
+    cam.image_height        = 600;
+    cam.samples_per_pixel   = 100;
     cam.max_depth           = 50;
     cam.background          = color(0, 0, 0);
 
@@ -327,7 +348,7 @@ void cornell_box() {
     cam.focus_dist    = 10.0;
 
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void cornell_smoke() {
@@ -356,6 +377,9 @@ void cornell_smoke() {
     world.add(make_shared<constant_medium>(box1, 0.01, color(0,0,0)));
     world.add(make_shared<constant_medium>(box2, 0.01, color(1,1,1)));
 
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(0,0,0), vec3(0,0,0), vec3(0,0,0), empty_material);
+
     camera cam;
 
     cam.image_width         = 640;
@@ -372,7 +396,7 @@ void cornell_smoke() {
     cam.defocus_angle = 0;
     cam.focus_dist    = 10.0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void final_scene(int image_height, int image_width, int samples_per_pixel, int max_depth) {
@@ -436,6 +460,10 @@ void final_scene(int image_height, int image_width, int samples_per_pixel, int m
         )
     );
 
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(0,0,0), vec3(0,0,0), vec3(0,0,0), empty_material);
+
+
     camera cam;
 
     cam.image_height      = image_height;
@@ -453,7 +481,7 @@ void final_scene(int image_height, int image_width, int samples_per_pixel, int m
     cam.focus_dist    = 10.0;
 
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 int main() {

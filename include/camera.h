@@ -7,6 +7,7 @@
 
 #include "hittable.h"
 #include "material.h"
+#include "pdf.h"
 
 using namespace std;
 #include <vector>
@@ -32,7 +33,7 @@ public:
 
 
 
-  void render(const hittable& world) {
+  void render(const hittable& world, const hittable& lights) {
     initialize();
     clog << "Rendering image...\n";
     vector<vector<color>> image(image_height, vector<color>(image_width));  // Properly preallocate
@@ -57,7 +58,7 @@ public:
           for (int s_j = 0; s_j < sqrt_spp; s_j++) {
             for (int s_i = 0; s_i < sqrt_spp; s_i++) {
               ray r = get_ray(i, j, s_i, s_j);
-              pixel_color += ray_color(r, max_depth, world);
+              pixel_color += ray_color(r, max_depth, world, lights);
             }
           }
 
@@ -204,7 +205,7 @@ private:
       return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
     }
 
-    color ray_color(const ray& r, int depth, const hittable& world) const {
+    color ray_color(const ray& r, int depth, const hittable& world, const hittable& lights) const {
       //if we've exceeded the ray bounce limit, no more light is gathered
       if (depth <= 0)
         return color(0,0,0);
@@ -216,12 +217,20 @@ private:
 
       ray scattered;
       color attenuation;
-      color color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
+      double pdf_value;
+      color color_from_emission = rec.mat->emitted(r, rec, rec.u, rec.v, rec.p);
 
-      if (!rec.mat->scatter(r, rec, attenuation, scattered))
+      if (!rec.mat->scatter(r, rec, attenuation, scattered, pdf_value))
         return color_from_emission;
 
-      color color_from_scatter = attenuation * ray_color(scattered, depth-1, world);
+      hittable_pdf light_pdf(lights, rec.p);
+      scattered = ray(rec.p, light_pdf.generate(), r.time());
+      pdf_value = light_pdf.value(scattered.direction());
+
+     double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
+
+    color sample_color = ray_color(scattered, depth-1, world, lights);
+    color color_from_scatter = (attenuation * scattering_pdf * sample_color) / pdf_value;
 
       return color_from_emission + color_from_scatter;
     }
